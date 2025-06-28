@@ -12,16 +12,16 @@ const Controls = ({ isRunning, onPlayPause, onReset }) => {
         />
         {isRunning ? (
           <FaPause
-            className="w-8 h-8 cursor-pointer text-white"
+            className={`w-8 h-8 cursor-pointer text-white ${isRunning ? 'animate-pulse' : ''}`}
             onClick={onPlayPause}
           />
         ) : (
           <FaPlay
-            className="w-8 h-8 cursor-pointer text-white"
+            className="w-8 h-8 cursor-pointer transition transform duration-399 ease-out  hover:scale-125 text-white"
             onClick={onPlayPause}
           />
         )}
-        <FaCog className="w-6 h-6 cursor-pointer text-white" />
+        <FaCog className="transition transform hover-scale-110 duration-399 ease-out hover:scale-125 w-6 h-6 cursor-pointer text-white" />
       </div>
     </footer>
   );
