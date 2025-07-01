@@ -61,6 +61,7 @@ const useTimer = (customDurations) => {
   const [mode, setMode] = useState("focus");
   const [timeLeft, setTimeLeft] = useState(customDurations[mode] * 60);
   const [isRunning, setIsRunning] = useState(false);
+  const [cycleCount, setCycleCount] = useState(0);
 
   useEffect(() => {
     setTimeLeft(customDurations[mode] * 60);
@@ -80,8 +81,16 @@ const useTimer = (customDurations) => {
     if (timeLeft === 0 && isRunning) {
       setIsRunning(false);
       // Optional: auto-switch mode or play sound
+
+      if(mode === "focus"){
+        const nextCycle = cycleCount + 1;
+        setCycleCount(nextCycle);
+        setMode(nextCycle % 4 === 0 ? "rest" : "break");
+      } else {
+        setMode("focus");
+      }
     }
-  }, [timeLeft, isRunning]);
+  }, [timeLeft, isRunning, mode, cycleCount]);
 
   const handleReset = () => {
     setIsRunning(false);
@@ -95,6 +104,7 @@ const useTimer = (customDurations) => {
   const handleModeChange = (newMode) => {
     setMode(newMode);
     setIsRunning(false);
+    setCycleCount(0);
   };
 
   return {
