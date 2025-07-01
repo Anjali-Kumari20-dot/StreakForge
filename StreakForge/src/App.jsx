@@ -3,8 +3,17 @@ import Timer from "./components/Timer";
 import Header from "./components/Header";
 import Controls from "./components/Controls";
 import useTimer from "./hooks/useTimer";
+import SettingsModal from "./components/SettingsModel";
 
 const App = () => {
+
+  const[showSettings, setShowSettings] = useState(false);
+  const[customDurations, setCustomDurations] = useState({
+    focus: 25,
+    break: 5,
+    rest: 15,
+  })
+
   const{
     mode,
     timeLeft,
@@ -12,7 +21,7 @@ const App = () => {
     handleReset,
     handleToggle,
     handleModeChange,
-  } = useTimer();
+  } = useTimer(customDurations);
 
   return (
     <div className="w-full h-screen ">
@@ -29,9 +38,21 @@ const App = () => {
             isRunning={isRunning}
             onPlayPause={handleToggle}
             onReset={handleReset}
+            onOpenSettings={() => setShowSettings(true)}
           />
         </div>
       </div>
+    {/* Render the modal conditionally */}
+    {showSettings && (
+      <SettingsModal 
+        initialSettings={customDurations}
+        onClose={() => setShowSettings(false)}
+        onSave={(newSettings) => {
+          setCustomDurations(newSettings);
+          setShowSettings(false);
+        }}
+      />
+    )}
     </div>
   );
 };
