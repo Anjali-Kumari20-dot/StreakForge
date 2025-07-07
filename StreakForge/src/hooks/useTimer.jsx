@@ -1,8 +1,31 @@
 // export default useTimer;
 import { useEffect, useState } from "react";
 
-const playSound = () => {
-  new Audio('/alarm.mp3').play();
+let currentAudio;
+
+const audioDurations = {
+  focus: 5000,
+  break: 5000,
+  rest: 5000,
+}
+
+const playSound = (mode, onFinish) => {
+  if(currentAudio){
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+  }
+  currentAudio = new Audio(`/${mode}.mp3`);
+  currentAudio.play()
+  .then(() => {
+    currentAudio.onended = () => {
+      if(typeof onFinish === "function") onFinish();
+    };
+  })
+  .catch(err => {
+    console.warn("Playback failed:", err);
+    // Still call onFinish if sound fails, so timer doesn't hang
+    if(typeof onFinish === "function") onFinish();
+  });
 };
 
 const useTimer = (customDurations) => {
@@ -27,21 +50,25 @@ const useTimer = (customDurations) => {
     return () => clearInterval(timer);
   }, [isRunning, timeLeft]);
 
-  // 🔄 Transition when timer hits 0
+   // When timer ends, play sound, notify, and switch mode after delay
   useEffect(() => {
     if (timeLeft === 0 && isRunning) {
-      playSound();
       setIsRunning(false);
 
-      if(mode === "focus"){
-        const nextCycle = cycleCount + 1;
-        setCycleCount(nextCycle);
-        setMode(nextCycle % 4 === 0 ? "rest" : "break");
-      } else {
-        setMode("focus");
-      }
+      // Play sound, then switch mode inside callback 
+      playSound(mode, () => {
+        if (mode === "focus") {
+          const nextCycle = cycleCount + 1;
+          setCycleCount(nextCycle);
+          setMode(nextCycle % 4 === 0 ? "rest" : "break");
+        } else {
+          setMode("focus");
+        }
+        setTimeLeft(customDurations[mode] * 60); // Reset for new mode
+        setIsRunning(true);
+      }); 
     }
-  }, [timeLeft, isRunning, mode, cycleCount]);
+  }, [timeLeft, isRunning, mode, cycleCount, customDurations]);
 
   // Manual controls
   const handleReset = () => {
