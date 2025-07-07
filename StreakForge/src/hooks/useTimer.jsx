@@ -1,61 +1,9 @@
-// import { useEffect, useState } from "react";
-
-// const useTimer = (initialTime) => {
-//   const [mode, setMode] = useState("focus");
-//   const [timeLeft, setTimeLeft] = useState(customDurations[mode] * 60);
-//   const [isRunning, setIsRunning] = useState(false);
-
-//   useEffect(() => {
-//     setTimeLeft(customDurations[mode] * 60);
-//   }, [mode, customDurations]);
-
-//   useEffect(() => {
-//     let timer;
-//     if (isRunning && timeLeft > 0) {
-//       timer = setInterval(() => {
-//         setTimeLeft((prev) => prev - 1);
-//       }, 1000);
-//     }
-//     return () => clearInterval(timer);
-//   }, [isRunning, timeLeft]);
-
-//   useEffect(() => {
-//     if (timeLeft === 0 && isRunning) {
-//       setIsRunning(false);
-//       // Trigger sound or auto-mode switch here if you want
-//     }
-//   }, [timeLeft, isRunning]);
-
-//   const handleReset = () => {
-//     setIsRunning(false);
-//     setTimeLeft(initialTime);
-//   };
-
-//   const handleToggle = () => {
-//     setIsRunning((prev) => !prev);
-//   };
-
-//   // const handleModeChange = (newMode) => {
-//   //   setMode(newMode);
-//   //   // setIsRunning(false);
-//   //   setShowSettings(false);
-//   // };
-
-//   return {
-//     mode,
-//     setMode,
-//     timeLeft,
-//     setTimeLeft,
-//     isRunning,
-//     setIsRunning,
-//     handleReset,
-//     handleToggle,
-//     handleModeChange,
-//   };
-// };
-
 // export default useTimer;
 import { useEffect, useState } from "react";
+
+const playSound = () => {
+  new Audio('/alarm.mp3').play();
+};
 
 const useTimer = (customDurations) => {
   const [mode, setMode] = useState("focus");
@@ -63,24 +11,27 @@ const useTimer = (customDurations) => {
   const [isRunning, setIsRunning] = useState(false);
   const [cycleCount, setCycleCount] = useState(0);
 
+  // 🕒 Syncs timer when mode or durations change
   useEffect(() => {
     setTimeLeft(customDurations[mode] * 60);
   }, [mode, customDurations]);
 
+  // ⏳ Countdown tick logic
   useEffect(() => {
     if (!isRunning || timeLeft <= 0) return;
 
     const timer = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
+      setTimeLeft((prev) => Math.max(prev - 1, 0));
     }, 1000);
 
     return () => clearInterval(timer);
   }, [isRunning, timeLeft]);
 
+  // 🔄 Transition when timer hits 0
   useEffect(() => {
     if (timeLeft === 0 && isRunning) {
+      playSound();
       setIsRunning(false);
-      // Optional: auto-switch mode or play sound
 
       if(mode === "focus"){
         const nextCycle = cycleCount + 1;
@@ -92,6 +43,7 @@ const useTimer = (customDurations) => {
     }
   }, [timeLeft, isRunning, mode, cycleCount]);
 
+  // Manual controls
   const handleReset = () => {
     setIsRunning(false);
     setTimeLeft(customDurations[mode] * 60);
